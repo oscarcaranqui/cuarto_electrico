@@ -288,7 +288,6 @@ class Document:
             my_dict = json.loads(message_received[i].payload)
             response: Response = from_dict(Response, my_dict)
             medidores_ok = 0
-            print(response)
             for j in range(0, len(response.medidores)):
                 medidor: Medidor = from_dict(Medidor, response.medidores[j])
 
@@ -337,6 +336,7 @@ class Document:
         pages = convert_from_path(self.create_name_directory()[0])
         directory_save_image = os.path.join(directory_path_of_images, self.create_name_directory()[1]) + '.png'
         pages[0].save(directory_save_image, 'png')
+        time.sleep(0.1)
         return directory_save_image
 
 DOCUMENT = Document()
