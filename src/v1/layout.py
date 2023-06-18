@@ -1,18 +1,21 @@
-from pdf2image import convert_from_path
+# workaraund tyo work with external folders modules
+import sys
+from os.path import dirname, join, abspath
+
+sys.path.insert(0, abspath(join(dirname(__file__), '..')))
+
 from v1.energy import Response, Medidor
 from from_dict import from_dict
 from fpdf import FPDF
-import os
-import json
-import time
-import pytz
 import datetime
+import json
+import pytz
+import os
 
 user_current_directory = os.getcwd()
-directory_save_path_logo_siemav = os.path.join(user_current_directory, "v1/LOGO_SIEMAV.jpg")
-directory_save_path_logo_santa_priscila = os.path.join(user_current_directory, "v1/SP.jpg")
-directory_path_document = os.path.join(user_current_directory, "path_of_document")
-directory_path_of_images = os.path.join(user_current_directory, "path_of_images")
+directory_save_path_logo_siemav = os.path.join(user_current_directory, "src/v1/LOGO_SIEMAV.jpg")
+directory_save_path_logo_santa_priscila = os.path.join(user_current_directory, "src/v1/SP.jpg")
+directory_host_file = "/app/shared/cuarto_electrico"
 
 
 class Document:
@@ -61,58 +64,26 @@ class Document:
         self.pdf.ln(line_breaks)
 
         self.pdf.set_fill_color(249, 247, 210)
-        self.pdf.rect(x=10, y=87, w=297 - 20, h=15, style="F")
-        self.pdf.cell(w=27, h=10, txt="Fp I1", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="Fp I2", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="Fp I3", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-
-        self.pdf.set_fill_color(203, 211, 226)
-        self.pdf.rect(x=10, y=102, w=297 - 20, h=20, style="F")
-        self.pdf.cell(w=27, h=10, txt="P1 [kW]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="P2 [kW]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="P3 [kW]", border=0, align='C', fill=False)
+        self.pdf.rect(x=10, y=87, w=297 - 20, h=20, style="F")
+        self.pdf.cell(w=27, h=10, txt="Fp total", border=0, align='C', fill=False)
         self.pdf.ln(line_breaks)
         self.pdf.cell(w=27, h=10, txt="Ptotal [kW]", border=0, align='C', fill=False)
         self.pdf.ln(line_breaks)
-
-        self.pdf.set_fill_color(249, 247, 210)
-        self.pdf.rect(x=10, y=122, w=297 - 20, h=20, style="F")
-        self.pdf.cell(w=27, h=10, txt="Q1 [kVAR]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="Q2 [kVAR]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="Q3 [kVAR]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
         self.pdf.cell(w=27, h=10, txt="Qtotal [kVAR]", border=0, align='C', fill=False)
         self.pdf.ln(line_breaks)
-
-        self.pdf.set_fill_color(203, 211, 226)
-        self.pdf.rect(x=10, y=142, w=297 - 20, h=20, style="F")
-        self.pdf.cell(w=27, h=10, txt="S1 [kVA]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="S2 [kVA]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
-        self.pdf.cell(w=27, h=10, txt="S3 [kVA]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
         self.pdf.cell(w=27, h=10, txt="Stotal [kVA]", border=0, align='C', fill=False)
-        self.pdf.ln(line_breaks)
 
     def border(self, offset_x=0):
-        self.pdf.rect(x=10, y=10, w=297-10-10, h=210-10-10)
+        self.pdf.rect(x=10, y=10, w=297 - 10 - 10, h=210 - 10 - 10)
         self.pdf.line(x1=10, y1=30, x2=297 - 10, y2=30)
 
         line_horizontal = 25
         for i in range(1, line_horizontal + 1):
-            self.pdf.line(x1=10 + offset_x, y1=37 + 5*i, x2=297 - 10 + offset_x, y2=37 + 5*i)
+            self.pdf.line(x1=10 + offset_x, y1=37 + 5 * i, x2=297 - 10 + offset_x, y2=37 + 5 * i)
 
         line_vertical = 31
         for i in range(1, line_vertical + 2):
-            self.pdf.line(x1=27 + 8*i + offset_x, y1=42, x2=27 + 8*i + offset_x, y2=200)
+            self.pdf.line(x1=27 + 8 * i + offset_x, y1=42, x2=27 + 8 * i + offset_x, y2=200)
 
     def logos(self, offset_x=0):
         siemav = directory_save_path_logo_siemav
@@ -161,48 +132,15 @@ class Document:
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.current_c)), align='C')
 
         self.pdf.set_xy(x=30 + offset_x, y=85)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_a)), align='C')
+        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_total)), align='C')
 
         self.pdf.set_xy(x=30 + offset_x, y=90)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_b)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=95)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_c)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=100)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.active_power_a)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=105)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.active_power_b)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=110)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.active_power_c)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=115)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.active_power_total)), align='C')
 
-        self.pdf.set_xy(x=30 + offset_x, y=120)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.reactive_power_a)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=125)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.reactive_power_b)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=130)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.reactive_power_c)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=135)
+        self.pdf.set_xy(x=30 + offset_x, y=95)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.reactive_power_total)), align='C')
 
-        self.pdf.set_xy(x=30 + offset_x, y=140)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.apparent_power_a)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=145)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.apparent_power_b)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=150)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.apparent_power_c)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=155)
+        self.pdf.set_xy(x=30 + offset_x, y=100)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.apparent_power_total)), align='C')
 
     def Satec_PM135EH(self, offset_x, medidor):
@@ -236,48 +174,15 @@ class Document:
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.i3_current)), align='C')
 
         self.pdf.set_xy(x=30 + offset_x, y=85)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_l1)), align='C')
+        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.total_pf)), align='C')
 
         self.pdf.set_xy(x=30 + offset_x, y=90)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_l2)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=95)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.power_factor_l3)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=100)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kw_l1)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=105)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kw_l2)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=110)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kw_l3)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=115)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.total_kw)), align='C')
 
-        self.pdf.set_xy(x=30 + offset_x, y=120)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kvar_l1)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=125)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kvar_l2)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=130)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kvar_l3)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=135)
+        self.pdf.set_xy(x=30 + offset_x, y=95)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.total_kvar)), align='C')
 
-        self.pdf.set_xy(x=30 + offset_x, y=140)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kva_l1)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=145)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kva_l2)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=150)
-        self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.kva_l3)), align='C')
-
-        self.pdf.set_xy(x=30 + offset_x, y=155)
+        self.pdf.set_xy(x=30 + offset_x, y=100)
         self.pdf.cell(w=18, h=10, txt=str("{:.2f}".format(medidor.total_kva)), align='C')
 
     def info(self, message_received):
@@ -301,7 +206,8 @@ class Document:
                     self.pdf.cell(w=2, h=2, txt=str(response.date), align='C')
                     self.pdf.rotate(0)
 
-                    if message_received[i].topic.split("/")[0].upper() == "TAURA_2":
+                    if message_received[i].topic.split("/")[0].upper() == "TAURA_2" or \
+                            message_received[i].topic.split("/")[0].upper() == "BAJEN":
                         self.Satec_PM135EH(offset_x, medidor)
                     else:
                         self.Schneider_PM5500(offset_x, medidor)
@@ -316,8 +222,7 @@ class Document:
                 self.pdf.set_fill_color(239, 238, 224)
                 self.pdf.set_xy(x=35 + len_rectangular, y=30)
                 header_sector = str(sector).upper()
-                self.pdf.cell(w=8 * cantidad_de_medidores, h=12, txt= header_sector, align='C', border=1, fill=True)
-                # self.pdf.multi_cell(w=8 * cantidad_de_medidores, h=6, txt= header_sector, align='C', border=1, fill=True)
+                self.pdf.cell(w=8 * cantidad_de_medidores, h=12, txt=header_sector, align='C', border=1, fill=True)
                 len_rectangular = len_rectangular + cantidad_de_medidores * 8
 
     def create_name_directory(self):
@@ -326,17 +231,14 @@ class Document:
         ecuador_time = current_time.astimezone(ecuador_tz)
         formatted_date = ecuador_time.strftime("%d_%m_%Y__%H_%M_%S")
         name_file = formatted_date + ".pdf"
-        directory_save_path_document_without_ext = formatted_date
-        directory_save_path_document_pdf = os.path.join(directory_path_document, name_file)
-        return [directory_save_path_document_pdf, directory_save_path_document_without_ext]
+        directory_to_send = os.path.join(directory_host_file, name_file)
+        return directory_to_send
 
     def write_pdf(self, payload: list):
-        self.create_document(name_directory=self.create_name_directory()[0],
+        name_directory = self.create_name_directory()
+        self.create_document(name_directory=name_directory,
                              data=payload)
-        pages = convert_from_path(self.create_name_directory()[0])
-        directory_save_image = os.path.join(directory_path_of_images, self.create_name_directory()[1]) + '.png'
-        pages[0].save(directory_save_image, 'png')
-        time.sleep(0.1)
-        return directory_save_image
+        return name_directory
+
 
 DOCUMENT = Document()

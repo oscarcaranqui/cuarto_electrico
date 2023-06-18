@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 class Address:
     aplicacion: str
     ip: str = field(default=None, init=False)
-    port: int | str = field(default=None, init=False)
+    # port: int | str = field(default=None, init=False)
     method: str = field(default=None, init=False)
     baudrate: str = field(default=None, init=False)
     slave: int
